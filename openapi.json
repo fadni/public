@@ -1,0 +1,648 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a documentation of all resources  supported by the backend server",
+    "version": "1.0.0",
+    "title": "Academic System App API",
+    "contact": {
+      "name": "Khalid Elbadawi",
+      "email": "khalid.badawi@gmail.com"
+    },
+    "termsOfService": "http://fms.uofk.edu/terms",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Users in the system"
+    },
+    {
+      "name": "Colleges",
+      "description": "Colleges in a university"
+    },
+    {
+      "name": "Calendars",
+      "description": "Academic Calenders"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Logs user into the system",
+        "description": "",
+        "operationId": "",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "description": "Email address of the user",
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "description": "User password",
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/colleges": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "List all colleges in a given university",
+        "description": "Retrieve all colleges in the database. The details of list can be controlled by `list-only` parameter. To include the department resource, use `embed` paramter with 'department' as a value.",
+        "parameters": [
+          {
+            "name": "list-only",
+            "in": "query",
+            "description": "if set, retrieve only college id, name in arabic and its type",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "embed",
+            "in": "query",
+            "description": "the set of sub-resources (like department) to be included in the response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "department"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/College"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Add a new college",
+        "description": "Add a new college",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/College"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Validation Exception"
+          }
+        }
+      }
+    },
+    "/colleges/{id}": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Retrieve college information by Id",
+        "description": "Fetch college information by Id from database",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "list-only",
+            "in": "query",
+            "description": "if set, retrieve only college id, name in arabic and its type",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "embed",
+            "in": "query",
+            "description": "the set of sub-resources (like department) to be included in the response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "department"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Update college information by Id",
+        "description": "Update college information by Id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/College"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Colleges"
+        ],
+        "description": "delete college information",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/colleges/{id}/calendars": {
+      "summary": "Academic calendars",
+      "description": "Each college has a set of academic calendars. An academic calendar is identified by college Id and academic year. Academic year always refers to the starting year. So, the calendar of 2017-2018 has academic year of 2017.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieve all academic calendars ",
+        "description": "Retrieve all academic calendars that belongs to the college identified by `id`",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Filter the list whether the academic calendar is active or not",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Calendars",
+          "Colleges"
+        ]
+      },
+      "post": {
+        "summary": "Add a new academic calendar ",
+        "description": "Add a new academic calendar to the college with id = `id`",
+        "operationId": "",
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Calendars",
+          "Colleges"
+        ]
+      }
+    },
+    "/colleges/{id}/calendars/{year}": {
+      "summary": "manage a calendar resource",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "year",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      ],
+      "get": {
+        "summary": "display this academic calendar",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Calendars",
+          "Colleges"
+        ]
+      },
+      "patch": {
+        "summary": "update this academic calendar",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Calendars",
+          "Colleges"
+        ]
+      },
+      "delete": {
+        "summary": "delete this academic year",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Calendars",
+          "Colleges"
+        ]
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": "Logs out a user from the system",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "College": {
+        "description": "College object that needs to be added to the database",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/College"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "schemas": {
+      "College": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "name_ar": {
+            "type": "string",
+            "description": "college name in Arabic",
+            "example": "العلوم الرياضية"
+          },
+          "name_en": {
+            "type": "string",
+            "description": "college name in English",
+            "example": "Mathematical Sciences"
+          },
+          "type": {
+            "type": "string",
+            "description": "college type",
+            "example": "كلية",
+            "enum": [
+              "إدارة",
+              "كلية",
+              "مدرسة",
+              "معهد"
+            ]
+          }
+        }
+      },
+      "Calendar": {
+        "type": "object",
+        "description": "Academic calendar. Right now the calendar contains two dates: start date and end date",
+        "properties": {
+          "academic_year": {
+            "type": "string",
+            "format": "year",
+            "example": "2019"
+          },
+          "college_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Department": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name_ar": {
+            "type": "string",
+            "description": "Department name in Arabic"
+          },
+          "name_en": {
+            "type": "string",
+            "description": "Department name in English"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Department phone number"
+          },
+          "logo": {
+            "type": "string",
+            "format": "binary",
+            "description": "Department logo"
+          },
+          "college_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "College Id to which department belongs to"
+          },
+          "head": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Head department identified by Instructor Id"
+          }
+        }
+      },
+      "Course": {
+        "type": "object",
+        "description": "Couse is always offered by a department",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string",
+            "description": "Course code",
+            "maxLength": 10
+          },
+          "name_ar": {
+            "type": "string",
+            "description": "Course name in Arabic"
+          },
+          "name_en": {
+            "type": "string",
+            "description": "Course name in English"
+          },
+          "units": {
+            "type": "integer",
+            "description": "Credit hours"
+          },
+          "term": {
+            "type": "string",
+            "maxLength": 1,
+            "description": "Course is offered in which term: 1=first term, 2=second term, 3=third term, 0=all terms"
+          },
+          "department_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The department who offers this course"
+          }
+        }
+      },
+      "Program": {
+        "type": "object",
+        "description": "Programs offered by a college",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name_ar": {
+            "type": "string",
+            "description": "Program name in Arabic",
+            "example": "علوم الحاسوب"
+          },
+          "name_en": {
+            "type": "string",
+            "description": "Program name in English",
+            "example": "Computer Science"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Short name of program",
+            "example": "ح"
+          },
+          "degree": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "(B)achelor",
+              "(Q)ualification",
+              "(D)iploma",
+              "(M)aster"
+            ]
+          },
+          "college_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "College that offers this program"
+          }
+        }
+      },
+      "CourseProgram": {
+        "type": "object",
+        "description": "Programs associated with a course. A course could be offered to two different levels with different programs",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "program_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "course_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "level": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "1 for first year\"",
+              "2 for second year",
+              "3 for third",
+              "4 for forth",
+              "5 for fifth",
+              "6 for postgraduate"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "(U)niversity requirement",
+              "(F) => College requirement",
+              "(C)ore",
+              "(E)elective"
+            ]
+          }
+        }
+      },
+      "ClassSession": {
+        "type": "object",
+        "description": "A class session. Class has been avoided as it is used by OOP.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "course_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Course id"
+          },
+          "instructor_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Instructor id"
+          },
+          "classroom_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Classroom id"
+          },
+          "academic_year": {
+            "type": "string",
+            "format": "year",
+            "maxLength": 4,
+            "description": "Academic year according to calendar"
+          },
+          "term": {
+            "type": "string",
+            "maxLength": 1,
+            "description": "Academic term/semester"
+          },
+          "day": {
+            "type": "string",
+            "maxLength": 2,
+            "enum": [
+              "(Su)nday",
+              "(Mo)nday",
+              "(Tu)esday",
+              "(We)dnesday",
+              "(Th)ursday",
+              "(Fr)iday",
+              "(Sa)turday"
+            ],
+            "description": "Lecture day"
+          },
+          "time": {
+            "type": "string",
+            "format": "HH:MM",
+            "description": "lecture time"
+          }
+        }
+      }
+    }
+  }
+}
